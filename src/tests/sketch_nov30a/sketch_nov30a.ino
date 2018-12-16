@@ -1,4 +1,5 @@
 #include <Servo.h>
+#define nullptr NULL
 enum G_eExecutionState{
  Off = 0,
  Setup = 1,
@@ -141,7 +142,7 @@ class Leg
     void printInfos();
   private:
     Serv* m_aServs;
-    unsigned char m_iId = 999;
+    unsigned char m_iId;
     unsigned char* m_aPin;
     unsigned char* m_aPos;
     unsigned char* m_aDest;
@@ -151,7 +152,7 @@ class Leg
 Leg::Leg(){
 }
 Leg::Leg(unsigned char& id, unsigned char& pins){
-  if(&id != NULL && pins != NULL)
+  if(&id != nullptr && &pins != nullptr)
   {
     m_iId = id;
     m_aPin = &pins;
@@ -194,9 +195,9 @@ bool Leg::move(const unsigned char& speedReduction) {
     m_eState = Idle;
 }
 unsigned char G_aSpeedReduction[3] = {0, 0, 0};
-unsigned char G_aPins[3] = {9, 10, 11};
+unsigned char G_aPins[3] = {2, 3, 4};
 unsigned char G_aPos[] = {0, 0, 0};
-unsigned char aDest[] = {0, 0, 0};
+unsigned char aDest[] = {40, 40, 40};
 Leg leg;
 // the setup routine runs once when you press reset:
 void setup() {
@@ -207,16 +208,14 @@ void setup() {
 }
 // the loop routine runs over and over again forever:
 void loop(){
-  leg.move(*G_aSpeedReduction);
+    leg.move(*G_aSpeedReduction);
     leg.get_aDest(*aDest);
 
     leg.get_aPos(*G_aPos);
     char t = *G_aPos;
-    if (*G_aPos == aDest[0] 
-        && *(G_aPos+1) == aDest[1] 
-        && *(G_aPos+2) == aDest[2])
+    if (*G_aPos == aDest[0])
     {
-        unsigned char a = 180;
+        unsigned char a = random(40, 140);
         aDest[0] = a;
         aDest[1] = a;
         aDest[2] = a;
