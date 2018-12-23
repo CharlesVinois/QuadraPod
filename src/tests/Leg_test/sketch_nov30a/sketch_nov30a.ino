@@ -1,4 +1,6 @@
 #include <Servo.h>
+#include <SoftwareSerial.h>
+#include <stdio.h>
 #define nullptr NULL
 enum G_eExecutionState {
   Off = 0,
@@ -28,7 +30,7 @@ class Serv
     Serv();
     ~Serv();
     void setupP(const unsigned char& pin);
-    void move(const unsigned char& speedReduction = 1);
+    void moveP(const unsigned char& speedReduction = 1);
     void printInfos();
     void getPin(unsigned char& pin);
     void getPos(unsigned char& pos);
@@ -40,6 +42,7 @@ class Serv
     void setSpeedReduction(unsigned char& sr);
     void getPosState(unsigned char& posState);
     void getClockWise(bool& clockW);
+    void getIsStatic(bool& isStatic);
     void getExecState(G_eExecutionState& eState);
   private:
     Servo* m_cServo;
@@ -48,6 +51,7 @@ class Serv
     unsigned char m_iDest = 90;
     unsigned char m_aLim[2];
     bool m_bClockwise = true;
+    bool m_bIsStatic = true;
     unsigned char m_ePosState = 0;//associate to enum pos
     unsigned char m_iSpeedReduction = 1;
     G_eExecutionState m_eState = Off;
@@ -99,6 +103,9 @@ void Serv::getClockWise(bool& clockW) {
 void Serv::getExecState(G_eExecutionState& eState) {
   eState = m_eState;
 }
+void Serv::getIsStatic(bool& isStatic) {
+  isStatic = m_bIsStatic;
+}
 void Serv::setupP(const unsigned char& pin) {
   m_iPin = pin;
   m_cServo = new Servo();
@@ -115,7 +122,7 @@ void Serv::setupP(const unsigned char& pin) {
   }
   m_eState = Stop;
 }
-void Serv::move(const unsigned char& speedReduction) {
+void Serv::moveP(const unsigned char& speedReduction) {
   if (m_iPos != m_iDest && m_eState == Idle)
   {
     m_eState = Run;
@@ -123,11 +130,17 @@ void Serv::move(const unsigned char& speedReduction) {
     {
       m_cServo->write(m_iPos + 1);
       m_bClockwise = true;
+      m_bIsStatic = false;
     }
-    else
+    else if(m_iPos > m_iDest)
     {
       m_cServo->write(m_iPos - 1);
       m_bClockwise = false;
+      m_bIsStatic = false;
+    }
+    else
+    {
+      m_bIsStatic = true;
     }
     delay(1 * speedReduction);
     m_iPos = m_cServo->read();
@@ -147,17 +160,19 @@ class Leg
     Leg();
     Leg(unsigned char& id, unsigned char (&pins)[3], unsigned char (&lims)[3][2]);
     ~Leg();
-  	bool setupP(unsigned char (&pins)[3]);
-    bool move(const unsigned char& speedReduction);
+    bool setupP(unsigned char (&pins)[3]);
+    bool moveP(const unsigned char (&speedReduction)[3]);
     void printPos();
     void get_aPin(unsigned char (&aPin)[3]);
     void get_aPos(unsigned char (&aPos)[3]);
     void get_aDest(unsigned char (&aDest)[3]);
     void set_aDest(unsigned char (&aDest)[3]);
     void set_aLims(unsigned char (&aLims)[3][2]);
-    void get_aPosState(unsigned char& posState);
-    void get_aClockWise(bool& clockW);
+    void get_aPosState(unsigned char& aPosState);
+    void get_aClockWise(bool& aClockW);
+    void get_aIsStatic(bool& aIsStatic);
     void get_aExecState(G_eExecutionState eState[]);
+    void readSerial(unsigned char (&reply)[50]);
     void printInfos();
   private:
     Serv m_aServs[3];
@@ -167,6 +182,7 @@ class Leg
     unsigned char m_aDest[3];
     unsigned char m_aLims[3][2];
     bool m_bClockwise = true;
+    bool m_bIsStatic = true;
     G_eExecutionState m_eState = Off;
 };
 Leg::Leg() {
@@ -189,97 +205,152 @@ Leg::Leg(unsigned char& id, unsigned char (&pins)[3], unsigned char (&lims)[3][2
 Leg::~Leg() {
 }
 void Leg::get_aDest(unsigned char (&aDest)[3]) {
-  m_aServs[0].getDest(*m_aDest);
-  m_aServs[1].getDest(*(m_aDest + 1));
-  m_aServs[2].getDest(*(m_aDest + 2));
-  aDest[0] = *m_aDest;
-  aDest[1] = *(m_aDest + 1);
-  aDest[2] = *(m_aDest + 2);
+  for(unsigned char i = 0;i <= 2;i++)
+  {
+    m_aServs[i].getDest(m_aDest[i]);
+    aDest[i] = m_aDest[i];
+  }
 }
 void Leg::get_aPos(unsigned char (&aPos)[3]) {
-  m_aServs[0].getPos(*m_aPos);
-  m_aServs[1].getPos(*(m_aPos + 1));
-  m_aServs[2].getPos(*(m_aPos + 2));
-  aPos[0] = *m_aPos;
-  aPos[1] = *(m_aPos + 1);
-  aPos[2] = *(m_aPos + 2);
+  for(unsigned char i = 0;i <= 2;i++)
+  {
+    m_aServs[i].getPos(m_aPos[i]);
+    aPos[i] = m_aPos[i];
+  }
 }
 void Leg::set_aDest(unsigned char (&dest)[3]) {
   if (&dest != NULL)
   {
-    m_aDest[0] = dest[0];
-    m_aDest[1] = dest[1];
-    m_aDest[2] = dest[2];
-    m_aServs[0].setDest(*(m_aDest));
-    m_aServs[1].setDest(*(m_aDest + 1));
-    m_aServs[2].setDest(*(m_aDest + 2));
+    for(unsigned char i = 0;i <= 2;i++)
+    {
+      if(m_aDest[i] != dest[i])
+      {
+        m_aDest[i] = dest[i];
+        m_aServs[i].setDest(m_aDest[i]);
+        Serial.println("new dest");
+        Serial.println(*dest);
+      }
+    }
   }
 }
 void Leg::set_aLims(unsigned char (&lims)[3][2]) {
   if (&lims != NULL)
   {
-    for(int i = 0;i <=3;i++)
+    for(unsigned char i = 0;i <= 2;i++)
     {
-      	m_aLims[i][0] = lims[i][0];
-    	m_aLims[i][1] = lims[i][1];
-    	m_aLims[i][2] = lims[i][2];
+        m_aLims[i][0] = lims[i][0];
+      m_aLims[i][1] = lims[i][1];
+        m_aServs[i].set_aLim(m_aLims[i]);
     }
-    m_aServs[0].set_aLim(m_aLims[0]);
-    m_aServs[1].set_aLim(m_aLims[1]);
-    m_aServs[2].set_aLim(m_aLims[2]);
   }
+}
+void Leg::get_aIsStatic(bool& aIsStatic) {
+  aIsStatic = m_bIsStatic;
 }
 bool Leg::setupP(unsigned char (&aPins)[3]) {
   if (&aPins != NULL)
   {
-    m_aPin[0] = aPins[0];
-    m_aPin[1] = aPins[1];
-    m_aPin[2] = aPins[2];
-	m_aServs[0].setupP(m_aPin[0]);
-    m_aServs[1].setupP(m_aPin[1]);
-    m_aServs[2].setupP(m_aPin[2]);
+    for(unsigned char i = 0;i <= 2;i++)
+    {
+      m_aPin[i] = aPins[i];
+      m_aServs[i].setupP(m_aPin[i]);
+    }
+    return true;
   }
+  return false;
 }
-bool Leg::move(const unsigned char& speedReduction) {
+bool Leg::moveP(const unsigned char (&speedReduction)[3]) {
   m_eState = Run;
-  m_aServs[0].move(speedReduction);
-  m_aServs[1].move(speedReduction + 1);
-  m_aServs[2].move(speedReduction + 2);
+  for(unsigned char i = 0;i <= 2;i++)
+  {
+    m_aServs[i].moveP(speedReduction[i]);
+  }
   get_aPos(m_aPos);
   m_eState = Idle;
   return true;
 }
-unsigned char G_aSpeedReduction[3] = {3, 3, 3};
+SoftwareSerial mySerial(A3, A2); // RX, TX
+void sendCommand(const char * command){
+  Serial.print("Command send :");
+  Serial.println(command);
+  mySerial.println(command);
+  //wait some time
+  delay(100);
+  char reply[100];
+  int i = 0;
+  while (mySerial.available()) {
+    reply[i] = mySerial.read();
+    i += 1;
+  }
+  //end the string
+  reply[i] = '\0';
+  Serial.print(reply);
+  Serial.println("Reply end");
+}
+void setupBLE() {
+  sendCommand("AT");
+  sendCommand("AT+ROLE0");
+  sendCommand("AT+UUID0xFFE0");
+  sendCommand("AT+CHAR0xFFE1");
+  sendCommand("AT+NAMEbluino");
+}
+void Leg::readSerial(unsigned char (&reply)[50]){
+  if(strlen((const char *)reply) > 0 && strlen((const char *)reply) >= 4){
+    //Serial.print((char*)reply);
+    Serial.println("We have just read some data");
+    Serial.println(reply[0]);
+    Serial.println(reply[1]);
+    if (reply[0] == 77 && reply[1] == 86)
+    {
+      unsigned char a;
+      int tmp = atoi((const char*) &reply[2]);
+      Serial.println("convert");
+      Serial.println(tmp);
+      a = tmp;
+      Serial.println(a);
+      unsigned char aDest[3] = {a, a, a};
+      Serial.println(*aDest);
+      set_aDest(aDest);
+    }
+  }
+}
+void writeToBLE(char value) {
+  Serial.print("Writing hex :");
+  Serial.println(value, HEX);
+  mySerial.write(value);
+}
+unsigned char G_aSpeedReduction[3] = {8, 4, 1};
 unsigned char G_aLims[3][2] = {{40, 100}, {40, 100}, {40, 100}};
-unsigned char G_aPins[3] = {9, 10, 11};
+unsigned char G_aPins[3] = {2, 3, 4};
 unsigned char G_aPos[3] = {0, 0, 0};
 unsigned char aDest[3] = {40, 40, 40};
+unsigned char aReply[50];
 Leg leg;
+int i;
 // the setup routine runs once when you press reset:
 void setup() {
+  mySerial.begin(9600);
   Serial.begin(9600);
+  i = 0;
   unsigned char id = 1;
   leg = Leg(id, G_aPins, G_aLims);
-  leg.set_aDest(aDest);
+  //leg.set_aDest(aDest);
+  setupBLE();
 }
-// the loop routine runs over and over again forever:
-void loop() {
-//Serial.println(serv->read());
- 	leg.move(*G_aSpeedReduction);
-    leg.get_aDest(aDest);
-
-    leg.get_aPos(G_aPos);
-  unsigned char* k = G_aPos;
-  unsigned char* k1 = G_aPos + 1;
-  unsigned char* k2 = G_aPos + 2;
-    if (*G_aPos == aDest[0]
-        && *(G_aPos+1) == aDest[1] 
-        && *(G_aPos+2) == aDest[2])
-    {
-        unsigned char a = random(40, 140);
-        aDest[0] = a;
-        aDest[1] = a;
-        aDest[2] = a;
-        leg.set_aDest(aDest);
-    }
+void loop() {;
+  if (mySerial.available() && i < 50) {
+    delay(10);
+    aReply[i] = mySerial.read();
+    i += 1;
+  }
+  else
+  {
+    //end the string
+    aReply[i] = '\0';
+    i = 0;
+    leg.readSerial(aReply);
+  }
+  leg.moveP(G_aSpeedReduction);
+  //leg.get_aDest(aDest);
+  //leg.get_aPos(G_aPos);
 }
