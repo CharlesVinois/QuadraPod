@@ -1,0 +1,31 @@
+#######################################
+# Syntax Coloring Map LegController
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+LegController	KEYWORD1	LegController
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+setupP KEYWORD2
+moveP KEYWORD2
+printPos KEYWORD2
+get_aPin KEYWORD2
+get_aPos KEYWORD2
+get_aDest KEYWORD2
+set_aDest KEYWORD2
+set_aLims KEYWORD2
+get_aPosState KEYWORD2
+get_aClockWise KEYWORD2
+get_aIsStatic KEYWORD2
+get_aExecState KEYWORD2
+readSerial KEYWORD2
+printInfos KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

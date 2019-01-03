@@ -1,0 +1,32 @@
+#######################################
+# Syntax Coloring Map ServoController
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ServoController	KEYWORD1	ServoController
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+setupP KEYWORD2
+moveP KEYWORD2
+printInfos KEYWORD2
+getPin KEYWORD2
+getPos KEYWORD2
+getDest KEYWORD2
+setDest KEYWORD2
+get_aLim KEYWORD2
+set_aLim KEYWORD2
+getSpeedReduction KEYWORD2
+setSpeedReduction KEYWORD2
+getPosState KEYWORD2
+getClockWise KEYWORD2
+getIsStatic KEYWORD2
+getExecState KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

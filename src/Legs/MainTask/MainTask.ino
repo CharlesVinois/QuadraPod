@@ -1,19 +1,25 @@
 #include <definitions.h>
 #include <ServoControler.h>
-
 #include <LegController.h>
 #include <BluetoothCom.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
-unsigned char G_aSpeedReduction[3] = {8, 4, 1};
-unsigned char G_aLims[3][2] = {{40, 100}, {40, 100}, {40, 100}};
-unsigned char G_aPinServo[3] = {2, 3, 4};
+#define DEFAULT_PULSE_WIDTH   1500
+#define FREQUENCY             50
+
+unsigned char G_aSpeedReduction[nb_servo] = {8, 8, 8, 8};
+unsigned char G_aLims[nb_servo][2] = {{40, 90}, {40, 90}, {40, 90}, {40, 90}};
+unsigned char G_aPinServo[nb_servo] = {0, 1, 2, 3};
 unsigned char G_aPinBlue[2] = {2, 3};
-unsigned char G_aPos[3] = {0, 0, 0};
-unsigned char aDest[3] = {40, 40, 40};
-G_eCommand cmd;
-unsigned char value[3] = {90, 90, 90};
+unsigned char G_aIsreversed[nb_servo] = {false, true, false, false};
+unsigned char aDest[nb_servo] = {0, 0, 0, 0};
+G_eCommand cmd = G_eCommand::Unkown;
 Leg leg;
 BluetoothCom btc;
+SoftwareSerial* soSerial;
+// called this way, it uses the default address 0x40
+Adafruit_PWMServoDriver pwm;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -21,17 +27,20 @@ void setup() {
   unsigned char id = 1;
   leg = Leg(id, G_aPinServo, G_aLims);
   btc = BluetoothCom(id, G_aPinBlue);
+  btc.get_cSoSerial(*soSerial);
+  pwm = Adafruit_PWMServoDriver();
+  pwm.begin();
+  pwm.setPWMFreq(FREQUENCY);  // Analog servos run at ~60 Hz updates
 }
 void loop() {
-    btc.recieve(cmd, value);
-    //leg.get_aDest(aDest);
-    //leg.get_aPos(G_aPos);
-    //
+    btc.recieve(cmd, aDest);
+    leg.moveP(G_aSpeedReduction);
+    //TODO Move these lines into manger
     if (cmd == G_eCommand::Move) {
-        aDest[0] = value[0];
-        aDest[1] = value[1];
-        aDest[2] = value[2];
         leg.set_aDest(aDest);
-        leg.moveP(G_aSpeedReduction);
+    }
+    else if (cmd == G_eCommand::Infos) {
+        leg.printInfos(*soSerial);
+        cmd = G_eCommand::Unkown;
     }
 }
