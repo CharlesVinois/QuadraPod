@@ -7,7 +7,8 @@
 #include <Adafruit_PWMServoDriver.h>
 
 #define max_string 50
-#define nb_servo   3
+#define nb_servo_per_leg   3
+#define nb_leg  4
 
 #define FREQUENCY             60
 #define MIN_PULSE_WIDTH       544     // the shortest pulse sent to a servo  
@@ -40,6 +41,13 @@ enum G_eCommand{
  Infos = 1,
  Unkown = 2
 };
-
+template<typename T>
+class Observer {
+public:
+    void attach(T *bc) {
+        bc->registerObserver(this);
+    }
+    virtual void onReceivedData(const T*) = 0;
+};
 
 #endif /* DEF_H_ */

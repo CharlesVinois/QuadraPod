@@ -10,9 +10,10 @@ int pulseWidth(char angle)
 }
 Serv::Serv() {
 }
-Serv::Serv(Adafruit_PWMServoDriver& pwm, const unsigned char& pin, const bool& isReversed) {
+Serv::Serv(const unsigned char& pin,
+          Adafruit_PWMServoDriver& pwm) {
   *m_cPwm = pwm;
-  setupP(pin, isReversed);
+  setupP(pin, pwm);
 }
 Serv::~Serv() {
 }
@@ -62,12 +63,12 @@ void Serv::get_bIsStatic(bool& isStatic) {
  void Serv::get_bIsReversed(bool& isReversed) {
   isReversed = m_bIsReversed;
  }
-void Serv::setupP(const unsigned char& pin, const bool& isReversed) {
+void Serv::setupP(const unsigned char& pin,
+                 Adafruit_PWMServoDriver& pwm) {
+  *m_cPwm = pwm;
   m_iPin = pin;
-  m_bIsReversed = isReversed;
   m_aLim[0] = 40;
   m_aLim[1] = 100;
-  
   m_eState = Stop;
 }
 void Serv::moveP(const unsigned char& speedReduction) {

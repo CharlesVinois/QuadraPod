@@ -8,11 +8,14 @@ class Serv
 {
   public:
     Serv();
-    Serv(Adafruit_PWMServoDriver& pwm, const unsigned char& pin, const bool& isReversed = false);
+    Serv(const unsigned char& pin, 
+        Adafruit_PWMServoDriver& pwm);
     ~Serv();
-    void setupP(const unsigned char& pin, const bool& isReversed = false);
+    
+    void setupP(const unsigned char& pin, 
+                Adafruit_PWMServoDriver& pwm);
     void moveP(const unsigned char& speedReduction = 1);
-    void printInfos(SoftwareSerial& soSer);
+
     void get_iPin(unsigned char& pin);
     void get_iPos(unsigned char& pos);
     void get_iDest(unsigned char& dest);
@@ -26,6 +29,8 @@ class Serv
     void get_bIsStatic(bool& isStatic);
     void get_bIsReversed(bool& isReversed);
     void get_eExecState(G_eExecutionState& eState);
+
+    void printInfos(SoftwareSerial& soSer);
   private:
     Adafruit_PWMServoDriver* m_cPwm;
     unsigned char m_iPin;

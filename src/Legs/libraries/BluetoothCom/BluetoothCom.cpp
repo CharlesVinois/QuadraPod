@@ -12,6 +12,19 @@ BluetoothCom::BluetoothCom(unsigned char& id, unsigned char (&pins)[2]) {
 }
 BluetoothCom::~BluetoothCom() {
 }
+void BluetoothCom::registerObserver(Observer<BluetoothCom>* obs) {
+    m_pObserver = obs; //we will only allow one observer
+}
+
+void BluetoothCom::unregisterObserver() {
+    m_pObserver = nullptr;
+}
+
+void BluetoothCom::_notifyObserver() {
+    if (m_pObserver != nullptr) {
+        m_pObserver->onReceivedData(this); 
+    }
+}
 void BluetoothCom::sendCommand(const char * command){
   Serial.print("Command send :");
   Serial.println(command);
@@ -39,7 +52,7 @@ bool BluetoothCom::setupP(unsigned char (&aPins)[2]) {
   }
   return false;
 }
-void BluetoothCom::readSerial(G_eCommand& eCmd, unsigned char (&value)[nb_servo]){
+void BluetoothCom::readSerial(G_eCommand& eCmd, unsigned char (&value)[nb_servo_per_leg]){
   if(strlen((const char *)m_aReply) > 0 && strlen((const char *)m_aReply) >= 4) {
     Serial.println("We have just read some data");
     Serial.println(m_aReply[0]);
@@ -64,7 +77,7 @@ void BluetoothCom::readSerial(G_eCommand& eCmd, unsigned char (&value)[nb_servo]
   }
   eCmd = G_eCommand::Unkown;
 }
-void BluetoothCom::recieve(G_eCommand& eCmd, unsigned char (&value)[nb_servo]) {
+void BluetoothCom::recieve(G_eCommand& eCmd, unsigned char (&value)[nb_servo_per_leg]) {
     if (m_cSerial->available() && m_iCountReply < max_string) {
         delay(200);
         m_aReply[m_iCountReply] = m_cSerial->read();
