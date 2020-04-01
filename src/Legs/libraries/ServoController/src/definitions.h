@@ -11,9 +11,9 @@
 #define nb_leg  4
 
 #define FREQUENCY             60
-#define MIN_PULSE_WIDTH       544     // the shortest pulse sent to a servo  
-#define MAX_PULSE_WIDTH      2400     // the longest pulse sent to a servo 
-#define DEFAULT_PULSE_WIDTH  1500     // default pulse width when servo is attached
+#define MIN_PULSE_WIDTH       150     // the shortest pulse sent to a servo  
+#define MAX_PULSE_WIDTH       600     // the longest pulse sent to a servo 
+#define DEFAULT_PULSE_WIDTH   225     // default pulse width when servo is attached
 
 enum G_eExecutionState{
  Off = 0,

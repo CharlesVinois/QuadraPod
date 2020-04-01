@@ -11,9 +11,13 @@ int pulseWidth(char angle)
 Serv::Serv() {
 }
 Serv::Serv(const unsigned char& pin,
-          Adafruit_PWMServoDriver& pwm) {
-  *m_cPwm = pwm;
-  setupP(pin, pwm);
+          Adafruit_PWMServoDriver* pwm) {
+  m_cPwm = pwm;
+    m_iPin = pin;
+  m_aLim[0] = 40;
+  m_aLim[1] = 100;
+  m_eState = Stop;
+  //setupP(pin, pwm);
 }
 Serv::~Serv() {
 }
@@ -63,14 +67,14 @@ void Serv::get_bIsStatic(bool& isStatic) {
  void Serv::get_bIsReversed(bool& isReversed) {
   isReversed = m_bIsReversed;
  }
-void Serv::setupP(const unsigned char& pin,
-                 Adafruit_PWMServoDriver& pwm) {
-  *m_cPwm = pwm;
-  m_iPin = pin;
-  m_aLim[0] = 40;
-  m_aLim[1] = 100;
-  m_eState = Stop;
-}
+// void Serv::setupP(const unsigned char& pin,
+//                  Adafruit_PWMServoDriver& pwm) {
+//   m_cPwm = &pwm;
+//   m_iPin = pin;
+//   m_aLim[0] = 40;
+//   m_aLim[1] = 100;
+//   m_eState = Stop;
+// }
 void Serv::moveP(const unsigned char& speedReduction) {
   if (m_iPos != m_iDest && m_eState == Idle)
   {
@@ -101,54 +105,54 @@ void Serv::moveP(const unsigned char& speedReduction) {
     m_eState = Idle;
   }
 }
-void Serv::printInfos(SoftwareSerial& soSer) {  //TODO: Implement reflexivity
+void Serv::printInfos(SoftwareSerial* soSer) {  //TODO: Implement reflexivity
   Serial.println();
   Serial.println("servo : ");
   Serial.print("  pin : ");
   Serial.println(int(m_iPin));
-  Serial.print("  pos : ");
-  Serial.println(int(m_iPos));
-  Serial.print("  dest : ");
-  Serial.println(int(m_iDest));
-  Serial.print("  dist : ");
-  Serial.println(int(m_iDest) - int(m_iPos));
-  Serial.print("  lim : ");
-  Serial.print(int(m_aLim[0]));
-  Serial.print(", ");
-  Serial.println(int(m_aLim[1]));
-  Serial.print("  cloc : ");
-  Serial.println(m_bIsClockwise);
-  Serial.print("  static : ");
-  Serial.println(m_bIsStatic);
-  Serial.print("  spred : ");
-  Serial.println(int(m_iSpeedReduction));
-  Serial.print("  state : ");
-  Serial.println(int(m_eState));
-  Serial.print("  rever : ");
-  Serial.println(int(m_bIsReversed));
+  // Serial.print("  pos : ");
+  // Serial.println(int(m_iPos));
+  // Serial.print("  dest : ");
+  // Serial.println(int(m_iDest));
+  // Serial.print("  dist : ");
+  // Serial.println(int(m_iDest) - int(m_iPos));
+  // Serial.print("  lim : ");
+  // Serial.print(int(m_aLim[0]));
+  // Serial.print(", ");
+  // Serial.println(int(m_aLim[1]));
+  // Serial.print("  cloc : ");
+  // Serial.println(m_bIsClockwise);
+  // Serial.print("  static : ");
+  // Serial.println(m_bIsStatic);
+  // Serial.print("  spred : ");
+  // Serial.println(int(m_iSpeedReduction));
+  // Serial.print("  state : ");
+  // Serial.println(int(m_eState));
+  // Serial.print("  rever : ");
+  // Serial.println(int(m_bIsReversed));
 
-  soSer.println();
-  soSer.println("servo : ");
-  soSer.print("  pin : ");
-  soSer.println(int(m_iPin));
-  soSer.print("  pos : ");
-  soSer.println(int(m_iPos));
-  soSer.print("  dest : ");
-  soSer.println(int(m_iDest));
-  soSer.print("  dist : ");
-  soSer.println(int(m_iDest) - int(m_iPos));
-  soSer.print("  lim : ");
-  soSer.print(int(m_aLim[0]));
-  soSer.print(", ");
-  soSer.println(int(m_aLim[1]));
-  soSer.print("  cloc : ");
-  soSer.println(m_bIsClockwise);
-  soSer.print("  static : ");
-  soSer.println(m_bIsStatic);
-  soSer.print("  rever : ");
-  soSer.println(int(m_bIsReversed));
-  soSer.print("  spred : ");
-  soSer.println(int(m_iSpeedReduction));
-  soSer.print("  state : ");
-  soSer.println(int(m_eState));
+  // soSer->println();
+  // soSer->println("servo : ");
+  // soSer->print("  pin : ");
+  // soSer->println(int(m_iPin));
+  // soSer->print("  pos : ");
+  // soSer->println(int(m_iPos));
+  // soSer->print("  dest : ");
+  // soSer->println(int(m_iDest));
+  // soSer->print("  dist : ");
+  // soSer->println(int(m_iDest) - int(m_iPos));
+  // soSer->print("  lim : ");
+  // soSer->print(int(m_aLim[0]));
+  // soSer->print(", ");
+  // soSer->println(int(m_aLim[1]));
+  // soSer->print("  cloc : ");
+  // soSer->println(m_bIsClockwise);
+  // soSer->print("  static : ");
+  // soSer->println(m_bIsStatic);
+  // soSer->print("  rever : ");
+  // soSer->println(int(m_bIsReversed));
+  // soSer->print("  spred : ");
+  // soSer->println(int(m_iSpeedReduction));
+  // soSer.print("  state : ");
+  // soSer.println(int(m_eState));
 }

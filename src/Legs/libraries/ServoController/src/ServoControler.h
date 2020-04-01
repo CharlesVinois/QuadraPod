@@ -9,11 +9,11 @@ class Serv
   public:
     Serv();
     Serv(const unsigned char& pin, 
-        Adafruit_PWMServoDriver& pwm);
+        Adafruit_PWMServoDriver* pwm);
     ~Serv();
     
-    void setupP(const unsigned char& pin, 
-                Adafruit_PWMServoDriver& pwm);
+    // void setupP(const unsigned char& pin, 
+    //             Adafruit_PWMServoDriver& pwm);
     void moveP(const unsigned char& speedReduction = 1);
 
     void get_iPin(unsigned char& pin);
@@ -30,7 +30,7 @@ class Serv
     void get_bIsReversed(bool& isReversed);
     void get_eExecState(G_eExecutionState& eState);
 
-    void printInfos(SoftwareSerial& soSer);
+    void printInfos(SoftwareSerial* soSer);
   private:
     Adafruit_PWMServoDriver* m_cPwm;
     unsigned char m_iPin;

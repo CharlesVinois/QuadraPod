@@ -1,0 +1,7 @@
+{
+    "port": "COM3",
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega168",
+    "sketch": "src\\tests\\Blutooth_test\\sketch_dec22a.ino",
+    "programmer": "Arduino as ISP"
+}

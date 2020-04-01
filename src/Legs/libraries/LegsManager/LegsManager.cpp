@@ -2,18 +2,16 @@
 
 Legs::Legs() {
 }
-Legs::Legs(unsigned char (&i)d[nb_leg],
+Legs::Legs(unsigned char (&id)[nb_leg],
          Adafruit_PWMServoDriver& pwm,
          unsigned char (&pins)[nb_leg][nb_servo_per_Leg],
          unsigned char (&lims)[nb_leg][nb_servo_per_Leg][2],
          const bool (&isReversed)[nb_leg][nb_servo_per_Leg]) {
-  if (&id != nullptr && &pins != nullptr && &lims != nullptr && &pwm != nullptr) {
     m_iId = id;
     setupP(pins, pwm, isReversed);
     get_aPos(m_aPos);
     set_aLims(lims);
     m_eState = Idle;
-  }
 }
 Legs::~Legs() {
 }
@@ -68,17 +66,14 @@ void Legs::get_aIsStatic(bool (&aIsStatic)[nb_leg][nb_servo_per_Leg]) {
 }
 bool Legs::setupP(unsigned char (&aPins)[nb_leg][nb_servo_per_Leg],
                  const bool (&isReversed)[nb_leg][nb_servo_per_Leg]) {
-  if (&aPins != NULL)
-  {
     for(unsigned char i = 0;i <= 2;i++)
     {
       m_aIsReversed[i] = isReversed[i];
       m_aPin[i] = aPins[i];
       m_aServs[i].setupP(m_aPin[i], isReversed[i]);
     }
+    Serial.println("Setup LEG : Done");
     return true;
-  }
-  return false;
 }
 bool Legs::moveP(const unsigned char (&speedReduction)[nb_leg][nb_servo_per_Leg]) {
   m_eState = Run;

@@ -3,7 +3,7 @@ class Legs : public Observer
 {
     public:
         Legs();
-        Legs(unsigned char (&id)[nb_leg][nb_servo_per_leg],
+        Legs(unsigned char &id,
             Adafruit_PWMServoDriver& pwm,
             unsigned char (&pins)[nb_leg][nb_servo_per_leg],
             unsigned char (&lims)[nb_leg][nb_servo_per_leg][2],

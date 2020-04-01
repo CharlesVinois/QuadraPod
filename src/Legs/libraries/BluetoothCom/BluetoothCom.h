@@ -15,7 +15,7 @@ class BluetoothCom
         void setupBLE();
         void recieve(G_eCommand& eCmd, unsigned char (&value)[nb_servo_per_leg]);
 
-        void get_cSoSerial(SoftwareSerial& soSerial);
+        SoftwareSerial* get_cSoSerial();
         void get_aPin(unsigned char (&aPin)[2]);
         void get_aExecState(G_eExecutionState eState);
 

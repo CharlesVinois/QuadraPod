@@ -7,13 +7,13 @@ class Leg
   public:
     Leg();
     Leg(unsigned char& id,
-        Adafruit_PWMServoDriver& pwm,
+        Adafruit_PWMServoDriver* pwm,
         unsigned char (&pins)[nb_servo_per_leg],
         unsigned char (&lims)[nb_servo_per_leg][2]);
     ~Leg();
 
-    bool setupP(unsigned char (&pins)[nb_servo_per_leg],
-                Adafruit_PWMServoDriver& pwm);
+    // bool setupP(unsigned char (&pins)[nb_servo_per_leg],
+    //             Adafruit_PWMServoDriver& pwm);
     bool moveP(const unsigned char (&speedReduction)[nb_servo_per_leg]);
 
     void get_aPin(unsigned char (&aPin)[nb_servo_per_leg]);
@@ -27,9 +27,9 @@ class Leg
     void get_aIsReversed(bool (&aIsReversed)[nb_servo_per_leg]);
     void get_aExecState(G_eExecutionState eState[]);
     
-    void printInfos(SoftwareSerial& soSer);
+    void printInfos(SoftwareSerial* soSer);
   private:
-    Serv m_aServs[nb_servo_per_leg];
+    Serv* m_aServs[nb_servo_per_leg];
     unsigned char m_iId;
     unsigned char m_aPin[nb_servo_per_leg];
     unsigned char m_aPos[nb_servo_per_leg];

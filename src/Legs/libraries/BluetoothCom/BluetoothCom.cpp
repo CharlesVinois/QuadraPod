@@ -3,12 +3,10 @@
 BluetoothCom::BluetoothCom() {
 }
 BluetoothCom::BluetoothCom(unsigned char& id, unsigned char (&pins)[2]) {
-  if (&id != nullptr && &pins != nullptr) {
     m_iId = id;
     m_iCountReply = 0;
     setupP(pins);
     m_eState = Idle;
-  }
 }
 BluetoothCom::~BluetoothCom() {
 }
@@ -25,14 +23,13 @@ void BluetoothCom::_notifyObserver() {
         m_pObserver->onReceivedData(this); 
     }
 }
-void BluetoothCom::sendCommand(const char * command){
+void BluetoothCom::sendCommand(const char* command){
   Serial.print("Command send :");
   Serial.println(command);
   m_cSerial->println(command);
-  delay(300);
 }
-void BluetoothCom::get_cSoSerial(SoftwareSerial& soSerial) {
-  soSerial = *m_cSerial;
+SoftwareSerial* BluetoothCom::get_cSoSerial() {
+  return m_cSerial;
 }
 void BluetoothCom::setupBLE() {
   sendCommand("AT");
@@ -42,21 +39,17 @@ void BluetoothCom::setupBLE() {
   sendCommand("AT+NAMEbluino");
 }
 bool BluetoothCom::setupP(unsigned char (&aPins)[2]) {
-  if (&aPins != NULL) {
     m_aPin[0] = aPins[0];
     m_aPin[1] = aPins[1];
     m_cSerial = new SoftwareSerial(A3, A2, false); // RX, TX / A for Analogue Pin prefix
-    m_cSerial->begin(9600);
+    m_cSerial->begin(74880); //74880
     setupBLE();
+    Serial.println("Setup BT : Done");
     return true;
-  }
-  return false;
 }
 void BluetoothCom::readSerial(G_eCommand& eCmd, unsigned char (&value)[nb_servo_per_leg]){
-  if(strlen((const char *)m_aReply) > 0 && strlen((const char *)m_aReply) >= 4) {
-    Serial.println("We have just read some data");
-    Serial.println(m_aReply[0]);
-    Serial.println(m_aReply[1]);
+  Serial.println("Reading data");
+  if(strlen((char*)m_aReply) > 0 && strlen((char*)m_aReply) >= 4) {
     if (m_aReply[0] == 77 && m_aReply[1] == 86) { // M : 77 / V : 86 e.g : MV100
       eCmd = G_eCommand::Move;
       value[0] = atoi((const char*) &m_aReply[2]); // Angular motion value
@@ -78,16 +71,30 @@ void BluetoothCom::readSerial(G_eCommand& eCmd, unsigned char (&value)[nb_servo_
   eCmd = G_eCommand::Unkown;
 }
 void BluetoothCom::recieve(G_eCommand& eCmd, unsigned char (&value)[nb_servo_per_leg]) {
-    if (m_cSerial->available() && m_iCountReply < max_string) {
-        delay(200);
+    m_iCountReply = 0;
+    while (m_cSerial->available() > 0) {
         m_aReply[m_iCountReply] = m_cSerial->read();
+        //FOR DEBUG ONLY
+        // m_cSerial->write(m_aReply[m_iCountReply]);
+        // Serial.print("INT: ");
+        // Serial.println((int)m_aReply[m_iCountReply]);
+        // Serial.print("CHAR: ");
+        // Serial.println(m_aReply[m_iCountReply], DEC);
+        // Serial.print("DEC: ");
+        // Serial.println(m_aReply[m_iCountReply], DEC);
+        // Serial.print("HEX: ");
+        // Serial.println(m_aReply[m_iCountReply], HEX);
+        // Serial.print("BIN: ");
+        // Serial.println(m_aReply[m_iCountReply], BIN);
         m_iCountReply += 1;
     }
-    else {
-        //end the string
-        m_aReply[m_iCountReply] = '\0';
-        m_iCountReply = 0;
-        readSerial(eCmd, value);
+    //end the string
+    m_aReply[m_iCountReply] = '\0';
+    if(m_iCountReply > 0){
+      // Serial.print("Count read : ");
+      // Serial.println(m_iCountReply);
+      // Serial.println((char*)m_aReply);
+      readSerial(eCmd, value);
     }
 }
 void BluetoothCom::writeToBLE(char value) {
